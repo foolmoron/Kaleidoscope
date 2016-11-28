@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kaleidoscope by @foolmoron</title>
+    <style>
+        body {
+            background: white;
+            margin: 0;
+        }
+
+        #canvas {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .shader {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script id="vert" type="x-shader/x-fragment">
+        varying vec2 vUv;
+
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    </script>
+    <script id="frag" type="x-shader/x-fragment">
+        uniform sampler2D tex;
+        uniform float time;
+        uniform float rotation;
+
+        varying vec2 vUv;
+
+        vec2 rotateAroundCenter(vec2 p, float rot) {
+            return vec2(0.5 + (cos(rot) * (p.x - 0.5)) - (sin(rot) * (p.y - 0.5)), 0.5 + (sin(rot) * (p.x - 0.5)) + (cos(rot) * (p.y - 0.5)));
+        }
+
+        void main() {
+            vec2 uv = rotateAroundCenter(vUv, rotation);
+            float lerp = (sin(5.0*time + 17.0*uv.x) + 1.0) / 2.0;
+            gl_FragColor = mix(texture2D(tex, uv), vec4(uv, 1.0, 1.0), lerp);
+            // gl_FragColor = vec4(1.0, abs(vUv.x), 1.0, 1.0);
+        }
+    </script>
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.js"></script>
+<script src="main.js"></script>
+</html>
