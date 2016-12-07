@@ -108,13 +108,24 @@ scene.add(quad)
 
 // Device rotation
 var latestDeviceRotation
-var latestDeviceRotationTime
-window.addEventListener('devicemotion', function(e) {
-    var gravity = [e.accelerationIncludingGravity.x - e.acceleration.x, e.accelerationIncludingGravity.y - e.acceleration.y]
-    var angle = Math.atan2(gravity[1], gravity[0]) + Math.PI
+// window.addEventListener('devicemotion', function(e) {
+//     var gravity = [e.accelerationIncludingGravity.x - e.acceleration.x, e.accelerationIncludingGravity.y - e.acceleration.y]
+//     var angle = Math.atan2(gravity[1], gravity[0]) + Math.PI
+//     latestDeviceRotation = angle
+//     latestDeviceRotationTime = performance.now()
+// })
+window.addEventListener('deviceorientation', function(e) {
+    var yaw = e.alpha / 180 * Math.PI
+    var pitch = e.beta / 180 * Math.PI
+    var roll = e.gamma / 180 * Math.PI
+    var x = -Math.cos(yaw)*Math.sin(pitch)*Math.sin(roll)-Math.sin(yaw)*Math.cos(roll)
+    var y = -Math.sin(yaw)*Math.sin(pitch)*Math.sin(roll)+Math.cos(yaw)*Math.cos(roll)
+    var z =  Math.cos(pitch)*Math.sin(roll)
+    var angle = Math.atan2(y, x)
+    console.log(x, y, z, angle * 180 / Math.PI)
     latestDeviceRotation = angle
-    latestDeviceRotationTime = performance.now()
 })
+
 
 // Render loop
 function render() {
@@ -123,7 +134,7 @@ function render() {
     uniforms.tex.value = tex[uniformsExtras.texName]
     uniforms.time.value += (uniformsExtras.advanceTime) ? dt : 0
     uniforms.colorphase.value = (uniforms.colorphase.value + dt * uniformsExtras.colorphaseVelocity + 2*Math.PI) % (2*Math.PI)
-    if (isFullscreen && latestDeviceRotationTime > (performance.now() - 1000)) {
+    if (isFullscreen && latestDeviceRotation != null) {
         uniforms.morphphase.value = latestDeviceRotation
         camera.rotation.z = latestDeviceRotation
     } else {
