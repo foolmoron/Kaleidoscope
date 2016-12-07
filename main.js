@@ -91,6 +91,9 @@ var uniformsExtras = {
             gui.destroy()
             isFullscreen = true
         }
+    },
+    source: function() {
+        window.open('https://github.com/foolmoron/kaleidoscope', '_blank')
     }
 }
 
@@ -163,6 +166,9 @@ window.onload = function() {
             checkbox.click()
         }
     }, 0)
+
+    gui.add(uniformsExtras, 'source')
+        .name('Source code by @foolmoron (based on shader by TekF)')
     
     var fProps = gui.addFolder('Pulsation')
     fProps.open()
@@ -220,7 +226,7 @@ window.onload = function() {
         .step(0.01)
 
     gui.add(uniformsExtras, 'fullscreen')
-        .name('GUI-less Fullscreen Mode! PROTIP: Use a phone and lock screen rotation')
+        .name('GUI-less Fullscreen Mode! PROTIP: On a phone, lock the screen rotation and rotate it around')
 
     // render
     render()
