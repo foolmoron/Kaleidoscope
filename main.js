@@ -10,6 +10,7 @@ function debounce(func, time, context) {
 
 // Global
 var gui
+var isFullscreen
 
 // Renderer setup
 var renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas') })
@@ -87,9 +88,10 @@ var uniformsExtras = {
         var requestFullScreen = canvas.requestFullScreen || canvas.webkitRequestFullscreen || canvas.mozRequestFullScreen || canvas.msRequestFullscreen
         if (requestFullScreen) {
             requestFullScreen.call(canvas)
+            // destroy dat.gui for performance
+            gui.destroy()
+            isFullscreen = true
         }
-        // destroy dat.gui for performance
-        gui.destroy()
     }
 }
 
@@ -104,16 +106,29 @@ quad.position.x = -quadSize/2
 quad.position.y = -quadSize/2
 scene.add(quad)
 
+// Device rotation
+var latestDeviceRotation
+var latestDeviceRotationTime
+window.addEventListener('devicemotion', function(e) {
+    var gravity = [e.accelerationIncludingGravity.x - e.acceleration.x, e.accelerationIncludingGravity.y - e.acceleration.y]
+    var angle = Math.atan2(gravity[1], gravity[0]) + Math.PI
+    latestDeviceRotation = angle
+    latestDeviceRotationTime = performance.now()
+})
+
 // Render loop
 function render() {
     var dt = clock.getDelta()
 
     uniforms.tex.value = tex[uniformsExtras.texName]
     uniforms.time.value += (uniformsExtras.advanceTime) ? dt : 0
-    uniforms.morphphase.value = (uniforms.morphphase.value + dt * uniformsExtras.morphphaseVelocity + 2*Math.PI) % (2*Math.PI)
     uniforms.colorphase.value = (uniforms.colorphase.value + dt * uniformsExtras.colorphaseVelocity + 2*Math.PI) % (2*Math.PI)
-
-    // camera.rotateZ(dt)
+    if (isFullscreen && latestDeviceRotationTime > (performance.now() - 1000)) {
+        uniforms.morphphase.value = latestDeviceRotation
+        camera.rotation.z = -latestDeviceRotation
+    } else {
+        uniforms.morphphase.value = (uniforms.morphphase.value + dt * uniformsExtras.morphphaseVelocity + 2*Math.PI) % (2*Math.PI)
+    }
 
     // check uniform diffs
     for (key in uniforms) {
