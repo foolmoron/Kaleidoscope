@@ -68,7 +68,6 @@ var uniforms = {
     time: { type: 'f', value: 0 },
     rotation: { type: 'f', value: 0 },
 
-    iterations: { type: 'i', value: 32 },
     period: { type: 'f', value: 4 },
     offset: { type: 'f', value: 0.1 },
     amplitude: { type: 'f', value: 0.2 },
@@ -122,7 +121,6 @@ window.addEventListener('deviceorientation', function(e) {
     var y = -Math.sin(yaw) * Math.sin(pitch) * Math.sin(roll) + Math.cos(yaw) * Math.cos(roll)
     var z = Math.cos(pitch) * Math.sin(roll)
     var angle = Math.atan2(y, x)
-    console.log(x, y, z, angle * 180 / Math.PI)
     latestDeviceRotation = angle
 })
 
@@ -158,7 +156,7 @@ window.onload = function() {
     // GUI
     gui = new dat.GUI()
 
-    gui.remember(uniformsExtras, uniforms.time, uniforms.iterations, uniforms.period, uniforms.offset, uniforms.amplitude, uniforms.morphphase, uniforms.colorphase)
+    gui.remember(uniformsExtras, uniforms.time, uniforms.period, uniforms.offset, uniforms.amplitude, uniforms.morphphase, uniforms.colorphase)
     setTimeout(() => { // force dat.gui local storage saving
         var checkbox = document.getElementById('dg-local-storage')
         if (!checkbox.getAttribute('checked')) {
@@ -177,10 +175,6 @@ window.onload = function() {
         .min(0)
         .step(0.1)
         .listen()
-    fProps.add(uniforms.iterations, 'value')
-        .name('Iterations')
-        .min(1)
-        .max(64)
     fProps.add(uniforms.period, 'value')
         .name('Period')
         .min(0)
@@ -226,7 +220,7 @@ window.onload = function() {
         .step(0.01)
 
     gui.add(uniformsExtras, 'fullscreen')
-        .name('GUI-less Fullscreen Mode! NOTE: Use a phone and lock screen rotation')
+        .name('GUI-less Fullscreen Mode! PROTIP: Use a phone and lock screen rotation')
 
     // render
     render()
