@@ -68,8 +68,15 @@ var uniforms = {
     period: { type: 'f', value: 4 },
     offset: { type: 'f', value: 0.1 },
     amplitude: { type: 'f', value: 0.2 },
-    morphphase: { type: 'f', value: 4 },
+    morphphase: { type: 'f', value: 0 },
     colorphase: { type: 'f', value: 0 },
+}
+var prevUniforms = {} // for diffing
+
+var uniformsExtras = {
+    advanceTime: true,
+    morphphaseVelocity: 0.1,
+    colorphaseVelocity: 1,
 }
 
 var quad = new THREE.Mesh(quadGeometry, new THREE.ShaderMaterial({
@@ -83,35 +90,105 @@ quad.position.x = -quadSize/2
 quad.position.y = -quadSize/2
 scene.add(quad)
 
-var md = [false, false, false]
-document.addEventListener('mousedown', (e) => md[e.button] = true)
-document.addEventListener('mouseup', (e) => md[e.button] = false)
-document.oncontextmenu = function(e) {
-    e.preventDefault()
-    return false
-}
-
 // Render loop
 function render() {
     var dt = clock.getDelta()
 
-    uniforms.time.value += dt
-    uniforms.time.needsUpdate = true
-    // uniforms.rotation.value += dt
-    // uniforms.rotation.needsUpdate = true
-
-    if (md[0]) {
-        uniforms.morphphase.value += dt * 3
-        uniforms.morphphase.needsUpdate = true
-    }
-    if (md[2]) {
-        uniforms.colorphase.value += dt * 3
-        uniforms.colorphase.needsUpdate = true
-    }
+    uniforms.time.value += (uniformsExtras.advanceTime) ? dt : 0
+    uniforms.morphphase.value = (uniforms.morphphase.value + dt * uniformsExtras.morphphaseVelocity + 2*Math.PI) % (2*Math.PI)
+    uniforms.colorphase.value = (uniforms.colorphase.value + dt * uniformsExtras.colorphaseVelocity + 2*Math.PI) % (2*Math.PI)
 
     // camera.rotateZ(dt)
+
+    // check uniform diffs
+    for (key in uniforms) {
+        if (uniforms[key].value !== prevUniforms[key]) {
+            uniforms[key].needsUpdate = true
+        }
+        prevUniforms[key] = uniforms[key].value
+    }
 
     renderer.render(scene, camera)
     requestAnimationFrame(render)
 }
-render()
+
+// Init
+window.onload = function() {
+    // GUI
+    var gui = new dat.GUI()
+    
+    gui.remember(uniformsExtras, uniforms.time, uniforms.iterations, uniforms.period, uniforms.offset, uniforms.amplitude, uniforms.morphphase, uniforms.colorphase)
+    setTimeout(() => { // force dat.gui local storage saving
+        var checkbox = document.getElementById('dg-local-storage')
+        if (!checkbox.getAttribute('checked')) {
+            checkbox.click()
+        }
+    }, 0)
+    
+    var fProps = gui.addFolder('Pulsation')
+    fProps.open()
+    fProps.add(uniformsExtras, 'advanceTime')
+        .name('Advance Time')
+        .listen()
+    fProps.add(uniforms.time, 'value')
+        .name('Time')
+        .min(0)
+        .step(0.1)
+        .listen()
+    fProps.add(uniforms.iterations, 'value')
+        .name('Iterations')
+        .min(1)
+        .max(64)
+        .listen()
+    fProps.add(uniforms.period, 'value')
+        .name('Period')
+        .min(0)
+        .max(10)
+        .step(0.01)
+        .listen()
+    fProps.add(uniforms.amplitude, 'value')
+        .name('Amplitude')
+        .min(0)
+        .max(1)
+        .step(0.01)
+        .listen()
+    fProps.add(uniforms.offset, 'value')
+        .name('Amplitude Offset')
+        .min(-0.4)
+        .max(0.4)
+        .step(0.01)
+        .listen()
+
+    var fMorph = gui.addFolder('Morph')
+    fMorph.open()
+    fMorph.add(uniforms.morphphase, 'value')
+        .name('Phase')
+        .min(0)
+        .max(2*Math.PI)
+        .step(0.01)
+        .listen()
+    fMorph.add(uniformsExtras, 'morphphaseVelocity')
+        .name('Velocity')
+        .min(-0.3*Math.PI)
+        .max(0.3*Math.PI)
+        .step(0.01)
+        .listen()
+
+    var fColor = gui.addFolder('Color')
+    fColor.open()
+    fColor.add(uniforms.colorphase, 'value')
+        .name('Phase')
+        .min(0)
+        .max(2*Math.PI)
+        .step(0.01)
+        .listen()
+    fColor.add(uniformsExtras, 'colorphaseVelocity')
+        .name('Velocity')
+        .min(-3*Math.PI)
+        .max(3*Math.PI)
+        .step(0.01)
+        .listen()
+
+    // render
+    render()
+}

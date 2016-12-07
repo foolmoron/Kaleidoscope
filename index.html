@@ -54,7 +54,7 @@
             uv = (uv.xy-.5) * 7.2;
 
             float r = ((sin(time*(TAU/period))+1.0)/2.0) * amplitude + (1.0 + offset - amplitude);
-            float a = morphphase*.1;
+            float a = morphphase;
             float c = cos(a)*r;
             float s = sin(a)*r;
             for ( int i=0; i<64; i++ ) {
@@ -75,5 +75,6 @@
     </script>
 </body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.js"></script>
+<script src="dat.gui.min.js"></script>
 <script src="main.js"></script>
 </html>
