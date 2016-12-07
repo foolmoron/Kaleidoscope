@@ -125,7 +125,7 @@ function render() {
     uniforms.colorphase.value = (uniforms.colorphase.value + dt * uniformsExtras.colorphaseVelocity + 2*Math.PI) % (2*Math.PI)
     if (isFullscreen && latestDeviceRotationTime > (performance.now() - 1000)) {
         uniforms.morphphase.value = latestDeviceRotation
-        camera.rotation.z = -latestDeviceRotation
+        camera.rotation.z = latestDeviceRotation
     } else {
         uniforms.morphphase.value = (uniforms.morphphase.value + dt * uniformsExtras.morphphaseVelocity + 2*Math.PI) % (2*Math.PI)
     }
