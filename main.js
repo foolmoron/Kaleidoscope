@@ -8,9 +8,49 @@ function debounce(func, time, context) {
     }
 }
 
-// Global
+// Misc global
 var gui
 var isFullscreen
+
+var extra = {
+    fullscreen: function() {
+        // fullscreen canvas
+        var canvas = document.getElementById('canvas')
+        var requestFullScreen = canvas.requestFullScreen || canvas.webkitRequestFullscreen || canvas.mozRequestFullScreen || canvas.msRequestFullscreen
+        if (requestFullScreen) {
+            requestFullScreen.call(canvas)
+        }
+    },
+    source: function() {
+        window.open('https://github.com/foolmoron/kaleidoscope', '_blank')
+    },
+}
+
+document.onfullscreenchange = document.onwebkitfullscreenchange = document.onmozfullscreenchange = document.onmsfullscreenchange = function(e) {
+    console.log(e)
+    var prevFullscreen = isFullscreen
+    isFullscreen = document.fullscreen || document.webkitIsFullScreen || document.mozFullScreen
+    if (!prevFullscreen && isFullscreen) {
+        // destroy dat.gui in full screen for performance
+        gui.destroy()
+    } else if (prevFullscreen && !isFullscreen) {
+        // rebuild dat.gui when exiting full screen
+        initGUI();
+    }
+}
+
+// Device rotation
+var latestDeviceRotation
+window.addEventListener('deviceorientation', function(e) {
+    var yaw = e.alpha / 180 * Math.PI
+    var pitch = e.beta / 180 * Math.PI
+    var roll = e.gamma / 180 * Math.PI
+    var x = -Math.cos(yaw) * Math.sin(pitch) * Math.sin(roll) - Math.sin(yaw) * Math.cos(roll)
+    var y = -Math.sin(yaw) * Math.sin(pitch) * Math.sin(roll) + Math.cos(yaw) * Math.cos(roll)
+    var z = Math.cos(pitch) * Math.sin(roll)
+    var angle = Math.atan2(y, x)
+    latestDeviceRotation = angle
+})
 
 // Renderer setup
 var renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas') })
@@ -81,20 +121,6 @@ var uniformsExtras = {
     advanceTime: true,
     morphphaseVelocity: 0.1,
     colorphaseVelocity: 1,
-    fullscreen: function() {
-        // fullscreen canvas
-        var canvas = document.getElementById('canvas')
-        var requestFullScreen = canvas.requestFullScreen || canvas.webkitRequestFullscreen || canvas.mozRequestFullScreen || canvas.msRequestFullscreen
-        if (requestFullScreen) {
-            requestFullScreen.call(canvas)
-            // destroy dat.gui for performance
-            gui.destroy()
-            isFullscreen = true
-        }
-    },
-    source: function() {
-        window.open('https://github.com/foolmoron/kaleidoscope', '_blank')
-    }
 }
 
 var quad = new THREE.Mesh(quadGeometry, new THREE.ShaderMaterial({
@@ -107,26 +133,6 @@ var quad = new THREE.Mesh(quadGeometry, new THREE.ShaderMaterial({
 quad.position.x = -quadSize/2
 quad.position.y = -quadSize/2
 scene.add(quad)
-
-// Device rotation
-var latestDeviceRotation
-// window.addEventListener('devicemotion', function(e) {
-//     var gravity = [e.accelerationIncludingGravity.x - e.acceleration.x, e.accelerationIncludingGravity.y - e.acceleration.y]
-//     var angle = Math.atan2(gravity[1], gravity[0]) + Math.PI
-//     latestDeviceRotation = angle
-//     latestDeviceRotationTime = performance.now()
-// })
-window.addEventListener('deviceorientation', function(e) {
-    var yaw = e.alpha / 180 * Math.PI
-    var pitch = e.beta / 180 * Math.PI
-    var roll = e.gamma / 180 * Math.PI
-    var x = -Math.cos(yaw) * Math.sin(pitch) * Math.sin(roll) - Math.sin(yaw) * Math.cos(roll)
-    var y = -Math.sin(yaw) * Math.sin(pitch) * Math.sin(roll) + Math.cos(yaw) * Math.cos(roll)
-    var z = Math.cos(pitch) * Math.sin(roll)
-    var angle = Math.atan2(y, x)
-    latestDeviceRotation = angle
-})
-
 
 // Render loop
 function render() {
@@ -154,20 +160,19 @@ function render() {
     requestAnimationFrame(render)
 }
 
-// Init
-window.onload = function() {
-    // GUI
+// GUI
+function initGUI() {
     gui = new dat.GUI()
 
-    gui.remember(uniformsExtras, uniforms.time, uniforms.period, uniforms.offset, uniforms.amplitude, uniforms.morphphase, uniforms.colorphase)
-    setTimeout(() => { // force dat.gui local storage saving
-        var checkbox = document.getElementById('dg-local-storage')
-        if (!checkbox.getAttribute('checked')) {
-            checkbox.click()
-        }
-    }, 0)
+    // gui.remember(uniformsExtras, uniforms.time, uniforms.period, uniforms.offset, uniforms.amplitude, uniforms.morphphase, uniforms.colorphase)
+    // setTimeout(() => { // force dat.gui local storage saving
+    //     var checkbox = document.getElementById('dg-local-storage')
+    //     if (!checkbox.getAttribute('checked')) {
+    //         checkbox.click()
+    //     }
+    // }, 0)
 
-    gui.add(uniformsExtras, 'source')
+    gui.add(extra, 'source')
         .name('Source code by @foolmoron (based on shader by TekF)')
     
     var fProps = gui.addFolder('Pulsation')
@@ -225,9 +230,12 @@ window.onload = function() {
         .max(3*Math.PI)
         .step(0.01)
 
-    gui.add(uniformsExtras, 'fullscreen')
+    gui.add(extra, 'fullscreen')
         .name('GUI-less Fullscreen Mode! PROTIP: On a phone, lock the screen rotation and rotate it around')
+}
 
-    // render
+// Init
+window.onload = function() {
+    initGUI()
     render()
 }
