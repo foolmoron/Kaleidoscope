@@ -88,10 +88,6 @@ var uniformsExtras = {
         if (requestFullScreen) {
             requestFullScreen.call(canvas)
         }
-        var lockOrientation = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation
-        if (lockOrientation) {
-            lockOrientation('landscape-primary')
-        }
         // destroy dat.gui for performance
         gui.destroy()
     }
@@ -204,7 +200,7 @@ window.onload = function() {
         .step(0.01)
 
     gui.add(uniformsExtras, 'fullscreen')
-        .name('GUI-less Fullscreen Mode!')
+        .name('GUI-less Fullscreen Mode! NOTE: Use a phone and lock screen rotation')
 
     // render
     render()
