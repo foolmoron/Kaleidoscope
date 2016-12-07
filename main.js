@@ -27,7 +27,6 @@ var extra = {
 }
 
 document.onfullscreenchange = document.onwebkitfullscreenchange = document.onmozfullscreenchange = document.onmsfullscreenchange = function(e) {
-    console.log(e)
     var prevFullscreen = isFullscreen
     isFullscreen = document.fullscreen || document.webkitIsFullScreen || document.mozFullScreen
     if (!prevFullscreen && isFullscreen) {
