@@ -118,9 +118,9 @@ window.addEventListener('deviceorientation', function(e) {
     var yaw = e.alpha / 180 * Math.PI
     var pitch = e.beta / 180 * Math.PI
     var roll = e.gamma / 180 * Math.PI
-    var x = -Math.cos(yaw)*Math.sin(pitch)*Math.sin(roll)-Math.sin(yaw)*Math.cos(roll)
-    var y = -Math.sin(yaw)*Math.sin(pitch)*Math.sin(roll)+Math.cos(yaw)*Math.cos(roll)
-    var z =  Math.cos(pitch)*Math.sin(roll)
+    var x = -Math.cos(yaw) * Math.sin(pitch) * Math.sin(roll) - Math.sin(yaw) * Math.cos(roll)
+    var y = -Math.sin(yaw) * Math.sin(pitch) * Math.sin(roll) + Math.cos(yaw) * Math.cos(roll)
+    var z = Math.cos(pitch) * Math.sin(roll)
     var angle = Math.atan2(y, x)
     console.log(x, y, z, angle * 180 / Math.PI)
     latestDeviceRotation = angle
@@ -135,7 +135,7 @@ function render() {
     uniforms.time.value += (uniformsExtras.advanceTime) ? dt : 0
     uniforms.colorphase.value = (uniforms.colorphase.value + dt * uniformsExtras.colorphaseVelocity + 2*Math.PI) % (2*Math.PI)
     if (isFullscreen && latestDeviceRotation != null) {
-        // uniforms.morphphase.value = latestDeviceRotation
+        uniforms.morphphase.value = latestDeviceRotation
         camera.rotation.z = -latestDeviceRotation
     } else {
         uniforms.morphphase.value = (uniforms.morphphase.value + dt * uniformsExtras.morphphaseVelocity + 2*Math.PI) % (2*Math.PI)
