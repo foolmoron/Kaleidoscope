@@ -8,6 +8,9 @@ function debounce(func, time, context) {
     }
 }
 
+// Global
+var gui
+
 // Renderer setup
 var renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas') })
 renderer.setPixelRatio(window.devicePixelRatio)
@@ -78,6 +81,16 @@ var uniformsExtras = {
     advanceTime: true,
     morphphaseVelocity: 0.1,
     colorphaseVelocity: 1,
+    fullscreen: function() {
+        // fullscreen canvas
+        var canvas = document.getElementById('canvas')
+        var fullscreenify = canvas.requestFullScreen || canvas.webkitRequestFullscreen || canvas.mozRequestFullScreen || canvas.msRequestFullscreen
+        if (fullscreenify) {
+            fullscreenify.call(canvas)
+        }
+        // destroy dat.gui for performance
+        gui.destroy()
+    }
 }
 
 var quad = new THREE.Mesh(quadGeometry, new THREE.ShaderMaterial({
@@ -117,7 +130,7 @@ function render() {
 // Init
 window.onload = function() {
     // GUI
-    var gui = new dat.GUI()
+    gui = new dat.GUI()
 
     gui.remember(uniformsExtras, uniforms.time, uniforms.iterations, uniforms.period, uniforms.offset, uniforms.amplitude, uniforms.morphphase, uniforms.colorphase)
     setTimeout(() => { // force dat.gui local storage saving
@@ -185,6 +198,9 @@ window.onload = function() {
         .min(-3*Math.PI)
         .max(3*Math.PI)
         .step(0.01)
+
+    gui.add(uniformsExtras, 'fullscreen')
+        .name('GUI-less Fullscreen Mode!')
 
     // render
     render()
