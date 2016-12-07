@@ -24,6 +24,9 @@ var extra = {
     source: function() {
         window.open('https://github.com/foolmoron/kaleidoscope', '_blank')
     },
+    shader: function() {
+        window.open('https://www.shadertoy.com/view/4lsGWj', '_blank')
+    },
 }
 
 document.onfullscreenchange = document.onwebkitfullscreenchange = document.onmozfullscreenchange = document.onmsfullscreenchange = function(e) {
@@ -172,7 +175,9 @@ function initGUI() {
     // }, 0)
 
     gui.add(extra, 'source')
-        .name('Source code by @foolmoron (based on shader by TekF)')
+        .name('Source code by @foolmoron')
+    gui.add(extra, 'shader')
+        .name('(based on shader by TekF)')
     
     var fProps = gui.addFolder('Pulsation')
     fProps.open()
