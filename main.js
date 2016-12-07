@@ -84,9 +84,13 @@ var uniformsExtras = {
     fullscreen: function() {
         // fullscreen canvas
         var canvas = document.getElementById('canvas')
-        var fullscreenify = canvas.requestFullScreen || canvas.webkitRequestFullscreen || canvas.mozRequestFullScreen || canvas.msRequestFullscreen
-        if (fullscreenify) {
-            fullscreenify.call(canvas)
+        var requestFullScreen = canvas.requestFullScreen || canvas.webkitRequestFullscreen || canvas.mozRequestFullScreen || canvas.msRequestFullscreen
+        if (requestFullScreen) {
+            requestFullScreen.call(canvas)
+        }
+        var lockOrientation = screen.lockOrientation || screen.mozLockOrientation || screen.msLockOrientation
+        if (lockOrientation) {
+            lockOrientation('landscape-primary')
         }
         // destroy dat.gui for performance
         gui.destroy()
