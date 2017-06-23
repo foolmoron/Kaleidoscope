@@ -11,6 +11,7 @@ function debounce(func, time, context) {
 // Misc global
 var gui
 var isFullscreen
+var uiZoomed
 
 var extra = {
     fullscreen: function() {
@@ -20,6 +21,11 @@ var extra = {
         if (requestFullScreen) {
             requestFullScreen.call(canvas)
         }
+    },
+    zoomUI: function() {
+        uiZoomed = !uiZoomed
+        gui.destroy()
+        initGUI()
     },
     source: function() {
         window.open('https://github.com/foolmoron/kaleidoscope', '_blank')
@@ -178,6 +184,9 @@ function initGUI() {
         .name('Source code by @foolmoron')
     gui.add(extra, 'shader')
         .name('(based on shader by TekF)')
+    gui.add(extra, 'zoomUI')
+        .name('Toggle UI Zoom')
+        .__li.style.padding = "14px 0px"
     
     var fProps = gui.addFolder('Pulsation')
     fProps.open()
@@ -236,6 +245,13 @@ function initGUI() {
 
     gui.add(extra, 'fullscreen')
         .name('GUI-less Fullscreen Mode! PROTIP: On a phone, lock the screen rotation and rotate it around')
+
+    // zooming
+    const scaleAmount = 2
+    var mainControls = document.querySelector('.dg.main')
+    if (uiZoomed) {
+        mainControls.style.transform = `scale(${scaleAmount}) translate3d(-${mainControls.offsetWidth / (scaleAmount*scaleAmount)}px, ${mainControls.offsetHeight / (scaleAmount*scaleAmount)}px, 0)`;
+    }
 }
 
 // Init
